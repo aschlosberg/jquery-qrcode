@@ -1,0 +1,25 @@
+<html>
+<head>
+<title>basic example</title>
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+
+<!--<script type="text/javascript" src="../jquery.qrcode.min.js"></script>
+--><script type="text/javascript" src="../src/jquery.qrcode.js?a"></script>
+<script type="text/javascript" src="../src/qrcode.js"></script>
+<script type="text/javascript" src="../src/canvas.rectRnd.js"></script>
+
+<div id="qrcodeCanvas" style="margin: 50px 0px 0px 50px"></div>
+<script>
+jQuery('#qrcodeCanvas').qrcode({
+	text		: "http://www.oonix.com.au",
+	width		: 252,
+	height		: 252,
+	roundCnr	: 0.8, // value from 0 to 1
+	fixDimensions	: -1 // rounding works best when all blocks have the same square dimensions - true uses closest size gt/lt zero rounds up/down respectively
+});
+</script>
+
+</body>
+</html>
