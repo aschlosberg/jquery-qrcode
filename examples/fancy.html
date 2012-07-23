@@ -1,0 +1,51 @@
+<html>
+<head>
+<title>fancy example</title>
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+
+<!--<script type="text/javascript" src="../jquery.qrcode.min.js"></script>
+--><script type="text/javascript" src="../src/jquery.qrcode.js"></script>
+<script type="text/javascript" src="../src/qrcode.js"></script>
+<script type="text/javascript" src="../src/canvas.rectRnd.js"></script>
+
+<script type="text/javascript" src="../externals/jsqrcode/src/grid.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/version.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/detector.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/formatinf.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/errorlevel.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/bitmat.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/datablock.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/bmparser.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/datamask.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/rsdecoder.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/gf256poly.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/gf256.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/decoder.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/QRCode.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/findpat.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/alignpat.js"></script>
+<script type="text/javascript" src="../externals/jsqrcode/src/databr.js"></script>
+
+<div id="qrcodeCanvas" style="margin: 50px 0px 0px 50px;"></div>
+
+<script>
+
+var grd = document.createElement('canvas').getContext('2d').createRadialGradient(238, 50, 10, 238, 50, 200);
+grd.addColorStop(0, "#8ED6FF");
+grd.addColorStop(1, "#004CB3");
+
+jQuery('#qrcodeCanvas').qrcode({
+	text		: "http://qrly.co",
+	foreground	: grd,
+	background	: "#fff",
+	roundCnr	: 1, // value from 0 to 1
+	fixDimensions	: true, // rounding works best when all blocks have the same square dimensions - true uses closest size gt/lt zero rounds up/down respectively
+	flipOnClick	: true
+});
+
+</script>
+
+</body>
+</html>

@@ -18,17 +18,31 @@
                         background      : "#ffffff",
                         foreground      : "#000000",
                         roundCnr	: 0,
-                        fixDimensions	: true // rounding works best when all blocks have the same square dimensions - true uses closest size gt/lt zero rounds up/down respectively
+                        fixDimensions	: true, // rounding works best when all blocks have the same square dimensions - true uses closest size gt/lt zero rounds up/down respectively
+                        flipOnClick	: false // for creative modification of codes utilising error correction
 		}, options);
+		
+		// create the qrcode itself
+		var qrcode = new qrCodeGenerator(options.typeNumber, options.correctLevel);
+		qrcode.addData(options.text);
+		qrcode.make();
+		
+		var canvas = document.createElement('canvas');
 
-		var createCanvas	= function(){
-			// create the qrcode itself
-			var qrcode	= new QRCode(options.typeNumber, options.correctLevel);
-			qrcode.addData(options.text);
-			qrcode.make();
-			
+		try {
+			if(!options.flipOnClick){
+				throw null;
+			}
+			var bits = new BitMatrix(qrcode.getModuleCount(), qrcode.getModuleCount());
+			var checkChanges = true;
+		}
+		catch(e){
+			var checkChanges = false;
+		}
+
+		var createCanvas	= function(addClick){
 			// check if the dimensions need to be modified
-			if(options.roundCnr!=0 && options.fixDimensions!=false){
+			if(options.fixDimensions!=false){
 				if(options.fixDimensions===true){ // round to closest
 					var fixFunc = Math.round;
 				}
@@ -43,10 +57,15 @@
 			}
 
 			// create canvas element
-			var canvas	= document.createElement('canvas');
+			
 			canvas.width	= options.width;
 			canvas.height	= options.height;
 			var ctx		= canvas.getContext('2d');
+			
+			ctx.fillStyle = options.background;
+			ctx.fillRect(0, 0, options.width, options.height);
+			
+			ctx.fillStyle = options.foreground; //use negative for dark areas
 
 			// compute tileW/tileH based on options.width/options.height
 			var tileW	= options.width  / qrcode.getModuleCount();
@@ -61,18 +80,21 @@
 				br	: [1, 1]
 			};
 
+			if(checkChanges){
+				bits.clear();
+			}
+
 			// draw in the canvas
 			for( var row = 0; row < qrcode.getModuleCount(); row++ ){
 				for( var col = 0; col < qrcode.getModuleCount(); col++ ){
 					var iAmDark = qrcode.isDark(row, col);
+					
+					if(checkChanges && iAmDark){
+						bits.set_Renamed(col, row);
+					}
+					
 					var w = (Math.ceil((col+1)*tileW) - Math.floor(col*tileW));
 					var h = (Math.ceil((row+1)*tileW) - Math.floor(row*tileW));
-					
-					//base fill with opposite so that corners work
-					ctx.fillStyle = iAmDark ? options.background : options.foreground;
-					ctx.fillRect(Math.round(col*tileW),Math.round(row*tileH), w, h);  
-					
-					ctx.fillStyle = iAmDark ? options.foreground : options.background;
 
 					// object to be passed to fillRectRnd()
 					var corners = {}
@@ -101,6 +123,10 @@
 								nX = neighbors[n][0];
 								nY = neighbors[n][1];
 								
+								if(typeof nX=='undefined' || typeof nY=='undefined'){
+									continue;
+								}
+								
 								if(iAmDark){ // don't round if either neighbor is also dark
 									if(	!(nX<0 || nY<0 || nX>=qrcode.getModuleCount() || nY>=qrcode.getModuleCount()) //check boundaries so isDark() doesn't throw an error
 										&& qrcode.isDark(nX, nY)
@@ -117,14 +143,61 @@
 							corners[c] = options.roundCnr;
 						}
 						catch(e){
+							if(e!==null){
+								throw e;
+							}
 							corners[c] = 0;
 						}
 
 					}
-					ctx.fillRectRnd(Math.round(col*tileW),Math.round(row*tileH), w, h, corners);
+					
+					if(iAmDark){
+						ctx.fillRectRnd(Math.round(col*tileW),Math.round(row*tileH), w, h, corners);
+					}
+					else {
+						ctx.fillRectRndNeg(Math.round(col*tileW),Math.round(row*tileH), w, h, corners);
+					}
 				}	
 			}
-			// return just built canvas
+			
+			if(addClick===true && options.fixDimensions!=false){
+				$(canvas).click(function(e){
+					if(!options.flipOnClick){
+						return true;
+					}
+					
+					var x = e.pageX - this.offsetLeft;
+					var y = e.pageY - this.offsetTop;
+					var row = Math.floor(x/tileW);
+					var col = Math.floor(y/tileH);
+
+					try {
+						//use jsqrcode to interpret the bits and see if flipping is acceptable with error correction
+						bits.flip(col, row);
+						var reader = Decoder.decode(bits);
+						var data = reader.DataByte;
+						var str="";
+						for(var i=0;i<data.length;i++)
+						{
+							for(var j=0;j<data[i].length;j++)
+								str+=String.fromCharCode(data[i][j]);
+						}
+						if(str!=options.text){
+							if(typeof options.noChangeCB == 'function'){
+								options.noChangeCB(row, col, true); //third parameter is to designate that we believe it is an encoding problem and not a scanning one
+							}
+							return false;
+						}
+					}
+					catch(e){
+						console.log('Exception when checking new code: '+e);
+					}
+					
+					qrcode.modules[col][row] = !qrcode.modules[col][row];
+					createCanvas(false);
+				});
+			}
+			
 			return canvas;
 		}
 
@@ -164,7 +237,7 @@
   
 
 		return this.each(function(){
-			var element	= options.render == "canvas" ? createCanvas() : createTable();
+			var element	= options.render == "canvas" ? createCanvas(true) : createTable();
 			$(element).appendTo(this);
 		});
 	};

@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------
-// QRCode for JavaScript
+// qrCodeGenerator for JavaScript
 //
 // Copyright (c) 2009 Kazuhiko Arase
 //
@@ -10,7 +10,7 @@
 //
 // The word "QR Code" is registered trademark of 
 // DENSO WAVE INCORPORATED
-//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//   http://www.denso-wave.com/qrCodeGenerator/faqpatent-e.html
 //
 //---------------------------------------------------------------------
 
@@ -38,10 +38,10 @@ QR8bitByte.prototype = {
 };
 
 //---------------------------------------------------------------------
-// QRCode
+// qrCodeGenerator
 //---------------------------------------------------------------------
 
-function QRCode(typeNumber, errorCorrectLevel) {
+function qrCodeGenerator(typeNumber, errorCorrectLevel) {
 	this.typeNumber = typeNumber;
 	this.errorCorrectLevel = errorCorrectLevel;
 	this.modules = null;
@@ -50,7 +50,7 @@ function QRCode(typeNumber, errorCorrectLevel) {
 	this.dataList = new Array();
 }
 
-QRCode.prototype = {
+qrCodeGenerator.prototype = {
 	
 	addData : function(data) {
 		var newData = new QR8bitByte(data);
@@ -122,7 +122,7 @@ QRCode.prototype = {
 		}
 	
 		if (this.dataCache == null) {
-			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+			this.dataCache = qrCodeGenerator.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
 		}
 	
 		this.mapData(this.dataCache, maskPattern);
@@ -353,10 +353,10 @@ QRCode.prototype = {
 
 };
 
-QRCode.PAD0 = 0xEC;
-QRCode.PAD1 = 0x11;
+qrCodeGenerator.PAD0 = 0xEC;
+qrCodeGenerator.PAD1 = 0x11;
 
-QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+qrCodeGenerator.createData = function(typeNumber, errorCorrectLevel, dataList) {
 	
 	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
 	
@@ -399,18 +399,18 @@ QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
 		if (buffer.getLengthInBits() >= totalDataCount * 8) {
 			break;
 		}
-		buffer.put(QRCode.PAD0, 8);
+		buffer.put(qrCodeGenerator.PAD0, 8);
 		
 		if (buffer.getLengthInBits() >= totalDataCount * 8) {
 			break;
 		}
-		buffer.put(QRCode.PAD1, 8);
+		buffer.put(qrCodeGenerator.PAD1, 8);
 	}
 
-	return QRCode.createBytes(buffer, rsBlocks);
+	return qrCodeGenerator.createBytes(buffer, rsBlocks);
 }
 
-QRCode.createBytes = function(buffer, rsBlocks) {
+qrCodeGenerator.createBytes = function(buffer, rsBlocks) {
 
 	var offset = 0;
 	
@@ -672,9 +672,9 @@ var QRUtil = {
 	    }
     },
 
-    getLostPoint : function(qrCode) {
+    getLostPoint : function(qrCodeGenerator) {
 	    
-	    var moduleCount = qrCode.getModuleCount();
+	    var moduleCount = qrCodeGenerator.getModuleCount();
 	    
 	    var lostPoint = 0;
 	    
@@ -685,7 +685,7 @@ var QRUtil = {
 		    for (var col = 0; col < moduleCount; col++) {
 
 			    var sameCount = 0;
-			    var dark = qrCode.isDark(row, col);
+			    var dark = qrCodeGenerator.isDark(row, col);
 
 				for (var r = -1; r <= 1; r++) {
 
@@ -703,7 +703,7 @@ var QRUtil = {
 						    continue;
 					    }
 
-					    if (dark == qrCode.isDark(row + r, col + c) ) {
+					    if (dark == qrCodeGenerator.isDark(row + r, col + c) ) {
 						    sameCount++;
 					    }
 				    }
@@ -720,10 +720,10 @@ var QRUtil = {
 	    for (var row = 0; row < moduleCount - 1; row++) {
 		    for (var col = 0; col < moduleCount - 1; col++) {
 			    var count = 0;
-			    if (qrCode.isDark(row,     col    ) ) count++;
-			    if (qrCode.isDark(row + 1, col    ) ) count++;
-			    if (qrCode.isDark(row,     col + 1) ) count++;
-			    if (qrCode.isDark(row + 1, col + 1) ) count++;
+			    if (qrCodeGenerator.isDark(row,     col    ) ) count++;
+			    if (qrCodeGenerator.isDark(row + 1, col    ) ) count++;
+			    if (qrCodeGenerator.isDark(row,     col + 1) ) count++;
+			    if (qrCodeGenerator.isDark(row + 1, col + 1) ) count++;
 			    if (count == 0 || count == 4) {
 				    lostPoint += 3;
 			    }
@@ -734,13 +734,13 @@ var QRUtil = {
 
 	    for (var row = 0; row < moduleCount; row++) {
 		    for (var col = 0; col < moduleCount - 6; col++) {
-			    if (qrCode.isDark(row, col)
-					    && !qrCode.isDark(row, col + 1)
-					    &&  qrCode.isDark(row, col + 2)
-					    &&  qrCode.isDark(row, col + 3)
-					    &&  qrCode.isDark(row, col + 4)
-					    && !qrCode.isDark(row, col + 5)
-					    &&  qrCode.isDark(row, col + 6) ) {
+			    if (qrCodeGenerator.isDark(row, col)
+					    && !qrCodeGenerator.isDark(row, col + 1)
+					    &&  qrCodeGenerator.isDark(row, col + 2)
+					    &&  qrCodeGenerator.isDark(row, col + 3)
+					    &&  qrCodeGenerator.isDark(row, col + 4)
+					    && !qrCodeGenerator.isDark(row, col + 5)
+					    &&  qrCodeGenerator.isDark(row, col + 6) ) {
 				    lostPoint += 40;
 			    }
 		    }
@@ -748,13 +748,13 @@ var QRUtil = {
 
 	    for (var col = 0; col < moduleCount; col++) {
 		    for (var row = 0; row < moduleCount - 6; row++) {
-			    if (qrCode.isDark(row, col)
-					    && !qrCode.isDark(row + 1, col)
-					    &&  qrCode.isDark(row + 2, col)
-					    &&  qrCode.isDark(row + 3, col)
-					    &&  qrCode.isDark(row + 4, col)
-					    && !qrCode.isDark(row + 5, col)
-					    &&  qrCode.isDark(row + 6, col) ) {
+			    if (qrCodeGenerator.isDark(row, col)
+					    && !qrCodeGenerator.isDark(row + 1, col)
+					    &&  qrCodeGenerator.isDark(row + 2, col)
+					    &&  qrCodeGenerator.isDark(row + 3, col)
+					    &&  qrCodeGenerator.isDark(row + 4, col)
+					    && !qrCodeGenerator.isDark(row + 5, col)
+					    &&  qrCodeGenerator.isDark(row + 6, col) ) {
 				    lostPoint += 40;
 			    }
 		    }
@@ -766,7 +766,7 @@ var QRUtil = {
 
 	    for (var col = 0; col < moduleCount; col++) {
 		    for (var row = 0; row < moduleCount; row++) {
-			    if (qrCode.isDark(row, col) ) {
+			    if (qrCodeGenerator.isDark(row, col) ) {
 				    darkCount++;
 			    }
 		    }

@@ -1,0 +1,3 @@
+[submodule "externals/jsqrcode"]
+	path = externals/jsqrcode
+	url = https://github.com/LazarSoft/jsqrcode.git
